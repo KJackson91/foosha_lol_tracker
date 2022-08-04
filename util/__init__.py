@@ -42,9 +42,11 @@ def was_win(game_a, game_b):
     
     game_a = game_a.to_dict()
     game_b = game_b.to_dict()
+
+
     if get_numeric_tier(game_b["tier"]) < get_numeric_tier(game_a["tier"]):
         return False
-    elif get_numeric_division(game_b["rank"]) != get_numeric_tier(game_a["rank"]):
+    elif get_numeric_division(game_b["rank"]) < get_numeric_division(game_a["rank"]):
         return False
     elif game_b["lp"] < game_a["lp"]:
         return False

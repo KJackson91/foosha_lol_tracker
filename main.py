@@ -47,7 +47,7 @@ class FooshaLoLTracker:
             for name in temp_rs.keys():
                 if name in self._ranked_stats:
 
-                    if self._ranked_stats[name] != temp_rs[name]:
+                    if self._ranked_stats[name] == temp_rs[name]:
 
                         result = was_win(game_a=self._ranked_stats[name], game_b=temp_rs[name])
 
@@ -70,7 +70,7 @@ class FooshaLoLTracker:
                         os.remove(image_path) 
 
             self._ranked_stats = temp_rs
-            await asyncio.sleep(30)
+            await asyncio.sleep(2)
 
     async def add_tracked_user(self, message):
 
