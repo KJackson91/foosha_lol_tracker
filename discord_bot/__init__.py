@@ -30,10 +30,10 @@ class DiscordBot(discord.Client):
             log.info(f"Adding {chan_id} to announce channels")
             self._announce_channels.append(chan_id)
 
-    async def announce(self, stats):
+    async def announce(self,file,stats):
         for channel in self._announce_channels:
             chan = self.get_channel(channel)
-            await chan.send(embed=stats)
+            await chan.send(file=file,embed=stats)
 
     async def on_message(self, message):
 

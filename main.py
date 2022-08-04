@@ -1,10 +1,13 @@
 import asyncio
 import configparser
 
+import os
+
 import discord
 
+
 from riot_api import RiotAPI
-from util import get_logger, extract_queue_rank, extract_remainder, was_win
+from util import get_logger, extract_queue_rank, extract_remainder, was_win,generateimage
 from discord_bot import DiscordBot
 
 
@@ -34,31 +37,39 @@ class FooshaLoLTracker:
         log.info("Starting check_tracked_users")
 
         while True:
+         
             temp_rs = {}
             for name in self._tracked_users:
                 rs = extract_queue_rank(await self._riot_api.get_ranked_stats_by_name(name),
                                         self._config.get("foosha", "queue_name"))
-                temp_rs[name] = rs
 
+                temp_rs[name] = rs
             for name in temp_rs.keys():
                 if name in self._ranked_stats:
+
                     if self._ranked_stats[name] != temp_rs[name]:
 
                         result = was_win(game_a=self._ranked_stats[name], game_b=temp_rs[name])
 
+                        image_path = await generateimage(temp_rs[name])
+
                         embed = discord.Embed(
                             title="Game result",
                             description=f"{name} {['lost', 'won'][result]} their game!",
-                            colour=[0xFF0000, 0x00FF00][result]
+                            colour=[0xFF0000, 0x00FF00][result],
                         )
+
+                        file = discord.File(image_path,filename='rankimage.png') 
+                        embed.set_thumbnail(url='attachment://rankimage.png')
+
 
                         embed.add_field(name="Previous rank", value=self._ranked_stats[name].to_str(), inline=True)
                         embed.add_field(name="Current rank", value=temp_rs[name].to_str(), inline=True)
 
-                        await self._discord_bot.announce(stats=embed)
+                        await self._discord_bot.announce(file=file,stats=embed)
+                        os.remove(image_path) 
 
             self._ranked_stats = temp_rs
-
             await asyncio.sleep(30)
 
     async def add_tracked_user(self, message):
