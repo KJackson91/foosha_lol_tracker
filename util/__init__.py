@@ -1,8 +1,10 @@
 import colorlog
-import sys
+import sys,random,string
+from PIL import Image,ImageDraw,ImageFont
 
 
 from util.league_rank import LoLRank
+
 
 
 def get_numeric_division(division):
@@ -37,9 +39,14 @@ def get_numeric_tier(tier):
 
 
 def was_win(game_a, game_b):
+    
+    game_a = game_a.to_dict()
+    game_b = game_b.to_dict()
+
+
     if get_numeric_tier(game_b["tier"]) < get_numeric_tier(game_a["tier"]):
         return False
-    elif get_numeric_division(game_b["rank"]) < get_numeric_tier(game_a["rank"]):
+    elif get_numeric_division(game_b["rank"]) < get_numeric_division(game_a["rank"]):
         return False
     elif game_b["lp"] < game_a["lp"]:
         return False
@@ -73,3 +80,17 @@ def get_logger(name: str) -> colorlog.log:
     logger.setLevel(colorlog.DEBUG)
 
     return logger
+
+
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
+
+
+async def generateimage(values):
+    RN = ImageFont.truetype("./assets/fonts/roman_font_7.ttf", 28, encoding="unic")
+    img = Image.open('./assets/img/' + values.tier + ".png")
+    width, height = img.size
+    id = "./temp/" + id_generator() + ".png"
+    img.save(id)
+    return id

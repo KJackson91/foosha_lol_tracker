@@ -16,11 +16,11 @@ class RiotAPI:
         self._lol_watcher = LolWatcher(self._api_key)
         log.info("Started Riot API")
 
-    async def get_player_by_name(self, name):
+    async def get_puuid_by_name(self, name):
         log.info(f"Fetching player: {name}")
         return self._lol_watcher.summoner.by_name(self._region, name)
 
     async def get_ranked_stats_by_name(self, name):
         log.info(f"Fetching ranked stats for player: {name}")
-        player = await self.get_player_by_name(name)
-        return self._lol_watcher.league.by_summoner(self._region, player['id'])
+
+        return self._lol_watcher.league.by_summoner(self._region, name)

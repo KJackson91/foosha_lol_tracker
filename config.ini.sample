@@ -1,9 +1,0 @@
-[foosha]
-queue_name = RANKED_SOLO_5x5
-
-[riot]
-api_key = ur riot api key
-
-[discord]
-
-api_key = ur discord api key
