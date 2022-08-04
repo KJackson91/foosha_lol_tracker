@@ -7,7 +7,7 @@ import discord
 
 
 from riot_api import RiotAPI
-from util import get_logger, extract_queue_rank, extract_remainder, was_win,generateimage
+from util import get_logger, extract_queue_rank, extract_remainder, was_win, generateimage
 from discord_bot import DiscordBot
 
 
@@ -19,6 +19,7 @@ class FooshaLoLTracker:
         self._config = configparser.ConfigParser()
         self._config.read("config.ini")
         self._tracked_users = []
+        self._username = {}
         self._ranked_stats = {}
 
         self._discord_bot = DiscordBot(self._config.get("discord", "api_key"))
@@ -47,38 +48,42 @@ class FooshaLoLTracker:
             for name in temp_rs.keys():
                 if name in self._ranked_stats:
 
-                    if self._ranked_stats[name] == temp_rs[name]:
+                    if self._ranked_stats[name] != temp_rs[name]:
 
                         result = was_win(game_a=self._ranked_stats[name], game_b=temp_rs[name])
 
-                        image_path = await generateimage(temp_rs[name])
+                        imagepath = await generateimage(temp_rs[name])
 
                         embed = discord.Embed(
                             title="Game result",
-                            description=f"{name} {['lost', 'won'][result]} their game!",
+                            description=f"{self._username[name]} {['lost', 'won'][result]} their game!",
                             colour=[0xFF0000, 0x00FF00][result],
                         )
 
-                        file = discord.File(image_path,filename='rankimage.png') 
+                        file = discord.File(imagepath,filename='rankimage.png') 
                         embed.set_thumbnail(url='attachment://rankimage.png')
-
 
                         embed.add_field(name="Previous rank", value=self._ranked_stats[name].to_str(), inline=True)
                         embed.add_field(name="Current rank", value=temp_rs[name].to_str(), inline=True)
 
-                        await self._discord_bot.announce(file=file,stats=embed)
-                        os.remove(image_path) 
+                        await self._discord_bot.announce(file=file, stats=embed, imagepath=imagepath)
 
             self._ranked_stats = temp_rs
-            await asyncio.sleep(2)
+            await asyncio.sleep(90)
 
     async def add_tracked_user(self, message):
 
-        name = extract_remainder(message)
+        username = extract_remainder(message)
 
-        if name not in self._tracked_users:
-            self._tracked_users.append(name)
-            log.info(f"Added {name} to tracked users")
+        puuid = await self._riot_api.get_puuid_by_name(username)
+        self._username[puuid['id']] = puuid['name']
+        print(puuid['id'])
+
+        
+
+        if puuid not in self._tracked_users:
+            self._tracked_users.append(puuid['id'])
+            log.info(f"Added {puuid['id']} to tracked users")
 
 
 if __name__ == '__main__':
