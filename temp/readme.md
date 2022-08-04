@@ -1,0 +1,1 @@
+#garbage collection for image thumbnail
